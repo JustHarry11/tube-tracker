@@ -2,6 +2,7 @@ import { Router } from "express";
 import { pool } from "../db/pool";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { authenticate } from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -87,6 +88,12 @@ router.post("/login", async (req, res) => {
       message: "Something went wrong",
     });
   }
+});
+
+router.get("/me", authenticate, (req, res) => {
+  res.json({
+    user: req.user,
+  });
 });
 
 export default router;
