@@ -3,6 +3,7 @@ import { pool } from "../db/pool";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { authenticate } from "../middleware/authMiddleware";
+import { findUserByEmail, createUser } from "../services/userService";
 
 const router = Router();
 
@@ -15,18 +16,18 @@ router.get("/test", (req, res) => {
 // Register a new user
 router.post("/register", async (req, res) => {
   const { email, password } = req.body;
+  const existingUser = await findUserByEmail(email);
+
+  if (existingUser) {
+    return res.status(409).json({
+      message: "User already exists",
+    });
+  }
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const result = await pool.query(
-    `
-      INSERT INTO users (email, password_hash)
-      VALUES ($1, $2)
-      RETURNING id, email, created_at
-  `,
-    [email, passwordHash]
-  );
-  res.status(201).json(result.rows[0]);
+  const user = await createUser(email, passwordHash);
+  res.status(201).json(user);
 });
 
 // Login a user
@@ -41,18 +42,13 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const result = await pool.query(
-      `
-      SELECT * FROM users WHERE email = $1
-  `,
-      [email]
-    );
+    const user = await findUserByEmail(email);
 
-    if (result.rows.length === 0) {
-      return res.status(401).json({ message: "Invalid email or password" });
+    if (!user) {
+      return res.status(401).json({ 
+        message: "Invalid email or password" 
+      });
     }
-
-    const user = result.rows[0];
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
