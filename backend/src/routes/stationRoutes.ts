@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { searchStations } from "../services/tflService";
+import { searchStations, getArrivals } from "../services/tflService";
 
 const router = Router();
 
@@ -13,8 +13,22 @@ router.get('/search', async (req, res) => {
         const stations = await searchStations(query);
         res.json(stations);
     } catch (error) {
-        console.error('Error searching stations:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error(error);
+        res.status(500).json({ message: 'Search query is required' });
+    }
+});
+
+router.get('/:stationId/arrivals', async (req, res) => {
+    try {
+        const { stationId } = req.params;
+
+        const arrivals = await getArrivals(stationId);
+
+        res.json(arrivals);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to get arrivals' });
     }
 });
 

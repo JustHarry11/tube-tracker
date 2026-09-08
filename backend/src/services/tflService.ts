@@ -16,3 +16,16 @@ export async function searchStations(query: string) {
             name: station.name,
         }));
 }
+
+export async function getArrivals(stationId: string) {
+    const response = await tflApi.get(
+        `/StopPoint/${stationId}/Arrivals`
+    );
+
+    return response.data.map((arrival: any) => ({
+        lineName: arrival.lineName,
+        destinationName: arrival.destinationName,
+        platformName: arrival.platformName,
+        minutes: Math.ceil(arrival.timeToStation / 60),
+    }));
+}
