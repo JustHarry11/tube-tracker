@@ -3,6 +3,7 @@ import cors from 'cors';
 import healthRoutes from './routes/heathRoutes';
 import authRoutes from './routes/authRoutes';
 import stationRoutes from './routes/stationRoutes';
+import favouriteRoutes from "./routes/favouriteRoutes";
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/stations', stationRoutes);
+app.use("/api/favourites", favouriteRoutes);
 
 
 export default app;
