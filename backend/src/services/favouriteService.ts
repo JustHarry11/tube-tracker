@@ -14,3 +14,16 @@ export async function getUserFavourites(userId: number) {
 
   return result.rows;
 }
+
+export async function addFavourite(userId: number, stationId: number) {
+  const result = await pool.query(
+    `
+    INSERT INTO favourite_stations (user_id, station_id)
+    VALUES ($1, $2)
+    RETURNING *
+    `,
+    [userId, stationId]
+  );
+
+  return result.rows[0];
+}
