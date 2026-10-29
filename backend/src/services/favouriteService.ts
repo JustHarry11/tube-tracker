@@ -27,3 +27,17 @@ export async function addFavourite(userId: number, stationId: number) {
 
   return result.rows[0];
 }
+
+
+export async function removeFavourite(userId: number, stationId: number) {
+  const result = await pool.query(
+    `
+    DELETE FROM favourite_stations
+    WHERE user_id = $1 AND station_id = $2
+    RETURNING *
+    `,
+    [userId, stationId]
+  );
+
+  return result.rows[0];
+}

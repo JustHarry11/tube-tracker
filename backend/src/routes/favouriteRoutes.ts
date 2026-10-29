@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middleware/authMiddleware";
-import { getUserFavourites, addFavourite } from "../services/favouriteService";
+import { getUserFavourites, addFavourite, removeFavourite } from "../services/favouriteService";
 
 const router = Router();
 
@@ -52,6 +52,41 @@ router.post("/", authenticate, async (req, res) => {
     });
   }
 });
+
+
+router.delete("/:stationId", authenticate, async (req, res) => {
+  try {
+    const stationId = Number(req.params.stationId);
+
+    if (!Number.isInteger(stationId) || stationId <= 0) {
+      return res.status(400).json({
+        message: "A valid station ID is required",
+      });
+    }
+
+    const deletedFavourite = await removeFavourite(
+      req.user!.id,
+      stationId
+    );
+
+    if (!deletedFavourite) {
+      return res.status(404).json({
+        message: "Favourite not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Favourite removed successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to remove favourite",
+    });
+  }
+});
+
 
 
 
